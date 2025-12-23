@@ -1,0 +1,224 @@
+.main_container {
+    background: #FFFFFF;
+    width: 100%;
+    max-width: 900px;
+    border-radius: 24px;
+    box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.08);
+    padding: 40px;
+    box-sizing: border-box;
+    margin: 20px auto;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #1A202C;
+}
+
+.error_wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.error_header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #EA580C;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+}
+
+.title_section {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 40px;
+    gap: 20px;
+}
+
+.title_text h1 {
+    font-size: 36px;
+    font-weight: 700;
+    margin: 0 0 12px 0;
+    color: #0F172A;
+    line-height: 1.1;
+}
+
+.title_text p {
+    color: #64748B;
+    font-size: 16px;
+    margin: 0;
+    max-width: 500px;
+    line-height: 1.5;
+}
+
+.warning_badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #ffffff;
+    border: 1px solid #FBD38D;
+    color: #EA580C;
+    padding: 10px 20px;
+    border-radius: 100px;
+    font-weight: 600;
+    font-size: 14px;
+    white-space: nowrap;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.dashed_box {
+    width: 100%;
+    height: 400px;
+    background-color: #FAFAFA;
+    background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='16' ry='16' stroke='%23CBD5E1FF' stroke-width='2' stroke-dasharray='12%2c 12' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e");
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.icon_circle {
+    width: 64px;
+    height: 64px;
+    background-color: #FFF7ED;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+
+.dashed_box h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #0F172A;
+    margin: 0 0 8px 0;
+}
+
+.dashed_box p {
+    color: #64748B;
+    font-size: 14px;
+    max-width: 320px;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.action_buttons {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.btn_primary {
+    color: white;
+    border: none;
+    padding: 16px 32px;
+    border-radius: 100px;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 12px rgba(83, 83, 83, 0.25);
+    transition: transform 0.2s ease;
+}
+
+.btn_primary:hover {
+    transform: translateY(-2px);
+    background-color: #EA580C;
+}
+
+.btn_secondary {
+    background-color: #FFFFFF;
+    color: #475569;
+    border: 1px solid #E2E8F0;
+    padding: 16px 24px;
+    border-radius: 100px;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.2s ease;
+}
+
+.btn_secondary:hover {
+    background-color: #F8FAFC;
+    border-color: #CBD5E1;
+}
+
+.success_wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.analysis_status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+}
+
+.results_row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.tumor_type {
+    font-size: 28px;
+    font-weight: 800;
+    color: #0F172A;
+}
+
+.tags_group {
+    display: flex;
+    gap: 12px;
+}
+
+.confidence_score {
+    color: white;
+    padding: 8px 16px;
+    border-radius: 100px;
+    font-weight: 600;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+}
+
+.urgency {
+    background-color: #F1F5F9;
+    color: #475569;
+    border: 1px solid #E2E8F0;
+    padding: 8px 16px;
+    border-radius: 100px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.valid_image {
+    width: 100%;
+    height: 450px;
+    object-fit: contain;
+    border-radius: 16px;
+    background-color: #000;
+    border: 1px solid #E2E8F0;
+    margin-bottom: 32px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
