@@ -1,113 +1,141 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import * as tf from "@tensorflow/tfjs";
-import TopBar from "./components/TopBar";
 import UploadMri from "./components/UploadMri";
 import Results from "./components/Results";
 import Loading from "./components/Loading";
+import TopBar from "./components/TopBar";
 
+// Define the structure of our analysis result
 interface AnalysisResult {
   predictions: string;
   confidence: string;
   urgency: string;
+  image: string; // We include the image URL here so Results can display it
   isError: boolean;
 }
 
 const CLASSES: { [key: number]: string } = {
-  0: "Glioma",
-  1: "Meningioma",
-  2: "No Tumor",
-  3: "Pituitary"
+  0: 'Glioma',
+  1: 'Meningioma',
+  2: 'Not an MRI',
+  3: 'No Tumor',
+  4: 'Pituitary'
 };
 
-function App() {
-  const [isDarkMode, setIsDarkMode] = useState(false);
+const App = () => {
   const [model, setModel] = useState<tf.GraphModel | null>(null);
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [results, setResults] = useState<AnalysisResult | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [appState, setAppState] = useState<"upload" | "loading" | "result">("upload");
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
+  // --- PHASE 1: Load Model on Startup ---
   useEffect(() => {
-    const loadModel = async () => {
+    async function loadModel() {
       try {
-        const loadedModel = await tf.loadGraphModel("/model/model.json");
+        // Ensure your model.json is inside the 'public/tfjs_model/' folder
+        const loadedModel = await tf.loadGraphModel("/tfjs_model/model.json");
         setModel(loadedModel);
+        console.log("Model loaded successfully");
       } catch (error) {
-        console.error(error);
+        console.error("Failed to load model:", error);
       }
-    };
+    }
     loadModel();
   }, []);
 
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-  };
+  const toggleDarkMode = () => setIsDarkMode(!isDarkMode);
 
+  // --- PHASE 2: Analyze the Image ---
   const handleAnalyze = async (file: File) => {
-    setIsLoading(true);
-    setResults(null);
-    const objectUrl = URL.createObjectURL(file);
-    setImageUrl(objectUrl);
+    if (!model) {
+      alert("Model is still loading. Please wait a moment.");
+      return;
+    }
+
+    setAppState("loading");
 
     try {
-      const minDelay = new Promise((resolve) => setTimeout(resolve, 3000));
+      // 1. Create Image URL
+      const objectUrl = URL.createObjectURL(file);
+      
+      // 2. Create an HTML Image Element to read pixel data
+      const imgElement = document.createElement("img");
+      imgElement.src = objectUrl;
 
-      if (model) {
-        const img = new Image();
-        img.src = objectUrl;
-        await new Promise((resolve) => (img.onload = resolve));
+      // 3. Wait for image to load, then process
+      await new Promise((resolve) => {
+        imgElement.onload = resolve;
+      });
 
-        const tensor = tf.browser.fromPixels(img)
-          .resizeNearestNeighbor([224, 224])
-          .toFloat()
-          .expandDims();
-
-        const prediction = model.predict(tensor) as tf.Tensor;
-        const data = await prediction.data();
-        const classIndex = Array.from(data).indexOf(Math.max(...Array.from(data)));
-        const resultText = CLASSES[classIndex];
-        const confidenceScore = (Math.max(...Array.from(data)) * 100).toFixed(2);
+      // 4. Convert Image to Tensor & Predict
+      const predictions = tf.tidy(() => {
+        let tensor = tf.browser.fromPixels(imgElement)
+          .resizeBilinear([224, 224]);
         
-        const urgencyLevel = (resultText === "No Tumor" || resultText === "Not an MRI") ? "None" : "High";
+        // Expand dimensions to create a batch: [1, 224, 224, 3]
+        const batched = tensor.expandDims(0);
+        
+        // Run prediction
+        return model.predict(batched) as tf.Tensor;
+      });
 
-        await minDelay;
+      const data = await predictions.data();
+      predictions.dispose(); // Clean up tensor memory
 
-        setResults({
-          predictions: resultText,
-          confidence: confidenceScore,
-          urgency: urgencyLevel,
-          isError: false
-        });
-      }
+      // 5. Interpret Results
+      const maxConfidence = Math.max(...Array.from(data));
+      const classIndex = Array.from(data).indexOf(maxConfidence);
+      const resultText = CLASSES[classIndex];
+      const confidencePercent = (maxConfidence * 100).toFixed(1);
+
+      // 6. Fake delay for UX (so user sees the loading animation)
+      await new Promise(r => setTimeout(r, 2000));
+
+      setAnalysisResult({
+        predictions: resultText,
+        confidence: confidencePercent,
+        urgency: (resultText === "No Tumor" || resultText === "Not an MRI") ? "None" : "High",
+        image: objectUrl,
+        isError: false
+      });
+
+      setAppState("result");
+
     } catch (error) {
-      console.error(error);
-      setResults({
+      console.error("Analysis failed", error);
+      setAnalysisResult({
         predictions: "Error",
         confidence: "0",
         urgency: "None",
+        image: "",
         isError: true
       });
-    } finally {
-      setIsLoading(false);
+      setAppState("result");
     }
+  };
+
+  const handleReset = () => {
+    setAppState("upload");
+    setAnalysisResult(null);
   };
 
   return (
     <div className={isDarkMode ? "dark" : ""}>
       <TopBar isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
       
-      {isLoading ? (
-        <Loading />
-      ) : results && imageUrl ? (
-        <Results 
-          results={results} 
-          image={imageUrl} 
-          onReset={() => setResults(null)} 
-        />
-      ) : (
+      {appState === "upload" && (
         <UploadMri onClick={handleAnalyze} />
+      )}
+
+      {appState === "loading" && (
+        <Loading />
+      )}
+
+      {appState === "result" && analysisResult && (
+        <Results results={analysisResult} onReset={handleReset} />
       )}
     </div>
   );
-}
+};
 
 export default App;

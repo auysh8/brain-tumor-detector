@@ -28,19 +28,22 @@ const UploadMri = ({ onClick }: UploadMriProps) => {
       </div>
       <h1 className={styles.heading}>Upload MRI Scans</h1>
       <p className={styles.instructions}>
-        Drag and drop your DICOM or NIfTI files for secure, AI-powered
-        neurological analysis.
+        Drag and drop your MRI scans to continue
       </p>
 
-      <div className={styles.input_area}>
+      {/* FIX: Conditionally add 'has_preview' class */}
+      <div className={`${styles.input_area} ${preview ? styles.has_preview : ''}`}>
         <input
           type="file"
           name="file_upload"
           id="file_upload"
+          accept="image/*"
           onChange={handleFile}
         />
         {preview ? (
-          <img className={styles.preview} src={preview} alt="MRI Scan" height="200px" />
+          <label htmlFor="file_upload" style={{ width: "100%", cursor: "pointer" }}>
+            <img className={styles.preview} src={preview} alt="MRI Scan" height="200px" />
+          </label>
         ) : (
           <label htmlFor="file_upload">
             <div className={styles.icon_circle}>
@@ -52,7 +55,12 @@ const UploadMri = ({ onClick }: UploadMriProps) => {
         )}
       </div>
 
-      <button className={styles.submit_button} onClick={() => file && onClick(file)}>
+      <button 
+        className={styles.submit_button} 
+        onClick={() => file && onClick(file)}
+        disabled={!file}
+        style={{ opacity: file ? 1 : 0.5, cursor: file ? 'pointer' : 'not-allowed' }}
+      >
         <BsStars size={18} style={{ transform: "rotate(90deg)" }} />
         <span>Analyze Scans</span>
         <FaArrowRight size={16} />
@@ -61,8 +69,7 @@ const UploadMri = ({ onClick }: UploadMriProps) => {
       <div className={styles.footer}>
         <IoMdLock size={14} />
         <span>
-          Data is encrypted end-to-end and processed in compliance with HIPAA
-          regulations.
+          Data is encrypted end-to-end and processed locally.
         </span>
       </div>
     </div>

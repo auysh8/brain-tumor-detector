@@ -1,131 +1,106 @@
 import styles from "./css/Results.module.css";
 import { GiHazardSign } from "react-icons/gi";
 import { BsStars } from "react-icons/bs";
-import { FaCheckCircle, FaFileUpload } from "react-icons/fa";
-import { MdErrorOutline, MdBrokenImage } from "react-icons/md";
+import { FaArrowRight } from "react-icons/fa";
+import { MdBrokenImage } from "react-icons/md";
+import { IoWarningOutline } from "react-icons/io5";
 
 interface ResultsProps {
   results: {
     predictions: string;
-    confidence: string | number;
+    confidence: string;
     urgency: string;
-    isError?: boolean;
+    image: string;
+    isError: boolean;
   };
   onReset: () => void;
-  image: string;
 }
 
-const Results = ({ results, onReset, image }: ResultsProps) => {
-  const isError = results.predictions === "Not an MRI" || results.isError;
-  const noTumor = results.predictions === "No Tumor";
+const Results = ({ results, onReset }: ResultsProps) => {
+  const isInvalid = results.predictions === "Not an MRI" || results.isError;
+  const isNoTumor = results.predictions === "No Tumor";
 
-  const handleButtonColor = () => {
-    if (isError) {
-      return { 
-        backgroundColor: "#F97316", 
-        boxShadow: "0 4px 12px rgba(249, 115, 22, 0.3)" 
-      };
-    }
-    if (noTumor) {
-      return { 
-        backgroundColor: "#27ae60", 
-        boxShadow: "0 4px 12px rgba(39, 174, 96, 0.3)" 
-      };
-    }
-    return { 
-      backgroundColor: "#E11D48", 
-      boxShadow: "0 4px 12px rgba(225, 29, 72, 0.3)" 
-    };
+  // Logic to determine button style based on result
+  const getButtonClass = () => {
+    if (isInvalid) return styles.btn_warning; // Orange for Error
+    if (isNoTumor) return styles.btn_success; // Green for Safe
+    return styles.btn_danger;                 // Red for Tumor
   };
 
   return (
-    <div className={styles.main_container}>
-      {isError ? (
-        <div className={styles.error_wrapper}>
-          <div className={styles.error_header}>
-            <MdErrorOutline size={16} />
-            <span>Processing Error</span>
+    <div className={styles.main_wrapper}>
+      {isInvalid ? (
+        <div className={styles.card_container}>
+          {/* Error Header */}
+          <div className={styles.error_header_row}>
+            <IoWarningOutline className={styles.orange_icon} />
+            <span>PROCESSING ERROR</span>
           </div>
 
-          <div className={styles.title_section}>
-            <div className={styles.title_text}>
-              <h1>Scan Processing Failed</h1>
-              <p>
-                The uploaded file is not an MRI scan. Please ensure you are uploading a valid MRI scan.
-              </p>
-            </div>
-            
-            <div className={styles.warning_badge}>
-              <GiHazardSign />
-              <span>Invalid Format</span>
-            </div>
+          <h2 className={styles.error_title}>Scan Unreadable</h2>
+          
+          <p className={styles.error_subtitle}>
+            The uploaded file is either corrupted or in an unsupported format.
+            Please check the file format or try uploading again.
+          </p>
+
+          <div className={styles.invalid_badge}>
+             <GiHazardSign />
+             <span>Invalid Format</span>
           </div>
 
-          <div className={styles.dashed_box}>
-            <div className={styles.icon_circle}>
-               <MdBrokenImage size={32} color="#F97316" />
+          {/* Dashed Warning Box */}
+          <div className={styles.preview_unavailable_box}>
+            <div className={styles.preview_icon_circle}>
+              <MdBrokenImage size={28} color="#f97316" />
             </div>
             <h3>Preview Unavailable</h3>
             <p>
-              We cannot generate a preview because the file structure does not match standard MRI data
+              The system could not render a preview for this file. Ensure the file
+              is a valid image scan.
             </p>
           </div>
-
-          <div className={styles.action_buttons}>
-            <button 
-              className={styles.btn_primary} 
-              style={handleButtonColor()} 
-              onClick={onReset}
-            >
-                <FaFileUpload />
-                <span>Upload New Scan</span>
-            </button>
-          </div>
-
         </div>
       ) : (
-        <div className={styles.success_wrapper}>
-           
-           <div
-            className={styles.analysis_status}
-            style={{ color: noTumor ? "#27ae60" : "#E11D48" }}
-          >
-            {noTumor ? <FaCheckCircle /> : <GiHazardSign />}
+        /* ... (Success/Tumor Layout remains same) ... */
+        <div className={styles.card_container}>
+          <div className={styles.analysis_status} style={{ color: isNoTumor ? '#10b981' : '#ef4444' }}>
+            <GiHazardSign />
             <span>Analysis Complete</span>
           </div>
-
-          <div className={styles.results_row}>
+          
+          <div className={styles.results}>
             <span className={styles.tumor_type}>
-              {noTumor ? "No Anomaly Detected" : `Anomaly Detected: ${results.predictions}`}
+              {isNoTumor ? "No Anomaly Detected" : `Anomaly Detected: ${results.predictions}`}
             </span>
             
-            <div className={styles.tags_group}>
-                <span
-                className={styles.confidence_score}
-                style={{ backgroundColor: noTumor ? "#27ae60" : "#E11D48" }}
-                >
+            <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                <span className={styles.confidence_score} style={{ background: isNoTumor ? '#d1fae5' : '#fee2e2', color: isNoTumor ? '#065f46' : '#991b1b' }}>
                 <BsStars style={{ marginRight: "6px" }} />
                 {results.confidence}% Confidence
                 </span>
-
                 <span className={styles.urgency}>Urgency: {results.urgency}</span>
             </div>
           </div>
-
-          <img src={image} alt="MRI Scan" className={styles.valid_image} />
-
-          <div className={styles.action_buttons}>
-            <button 
-              className={styles.btn_primary} 
-              style={handleButtonColor()} 
-              onClick={onReset}
-            >
-                <FaFileUpload/>
-                <span>Upload New Scan</span>
-            </button>
-          </div>
+          
+          {results.image && (
+            <div className={styles.image_container}>
+              <img src={results.image} alt="Scan" className={styles.valid_image} />
+            </div>
+          )}
         </div>
       )}
+
+      {/* Button Row */}
+      <div className={styles.action_buttons_row}>
+        <button 
+          className={`${styles.btn_action} ${getButtonClass()}`} 
+          onClick={onReset}
+        >
+          <FaArrowRight style={{ transform: "rotate(180deg)" }} />
+          <span>Upload New Scan</span>
+        </button>
+      </div>
     </div>
   );
 };
